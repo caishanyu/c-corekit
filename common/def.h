@@ -3,10 +3,24 @@
 
 #define SELF_TEST   (1)
 
+#include <stdio.h>
+#include <stdlib.h>
+#if SELF_TEST
+#include <stdarg.h>
+#include <stddef.h>
+#include <setjmp.h>
+#include <cmocka.h>
+#endif
+
 typedef enum
 {
     ERROR = -1,
     OK = 0,
 }STATUS;
+
+#if SELF_TEST
+#define malloc(size) _test_malloc(size, __FILE__, __LINE__)
+#define free(ptr)    _test_free(ptr, __FILE__, __LINE__)
+#endif
 
 #endif

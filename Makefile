@@ -1,7 +1,7 @@
 # 编译器和标志
 CC      := gcc
 CFLAGS  := -std=c11 -pedantic -Wall -Wextra
-LDFLAGS := -lpthread -lrt
+LDFLAGS := -lpthread -lrt -lcmocka
 INC     := -Icommon -Iatomic
 
 # 目录设置
@@ -19,9 +19,9 @@ TARGET := $(BIN_DIR)/main
 # 默认目标
 all: $(TARGET)
 
-# 链接可执行文件
+# 链接可执行文件，链接库放在最后边，防止依赖关系
 $(TARGET): $(OBJS) | $(BIN_DIR)
-	$(CC) $(LDFLAGS) $^ -o $@
+	$(CC) $^ -o $@ $(LDFLAGS)		
 
 # 编译规则（包含依赖生成）
 $(OBJ_DIR)/%.o: %.c | $(OBJ_DIR)
