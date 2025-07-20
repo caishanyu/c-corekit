@@ -152,6 +152,21 @@ void* dequeue(LockFreeQueue* q) {
     }
 }
 
+// 销毁队列
+STATUS queue_close(LockFreeQueue* q)
+{
+    if(!q)
+    {
+        return ERROR;
+    }
+    
+    while(NULL != dequeue(q))   {}
+
+    free(q->head);  // 释放哨兵节点
+
+    return OK;
+}
+
 #if SELF_TEST
 
 // 测试函数：生产者线程
@@ -204,19 +219,22 @@ void performance_test() {
     for (int i = 0; i < num_threads; i++) {
         pthread_join(threads[i], NULL);
     }
+
+    queue_close(&q);
     
     clock_gettime(CLOCK_MONOTONIC, &end);
     
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
     
     printf("MPMC performance: %.2f ops/sec\n", (num_threads * 1000) / elapsed);
+
 }
 
 #endif
 
-int test_lock_free_queue()
+void test_lock_free_queue(void **state)
 {
-
+    (void)state;
 #if SELF_TEST
     // 基本功能测试
     LockFreeQueue q;
@@ -240,11 +258,14 @@ int test_lock_free_queue()
             free(value);
         }
     }
+
+    assert_ptr_equal(q.head, q.tail);
+    assert_null(q.tail->next);
+
+    queue_close(&q);
     
     // 性能测试
     printf("\nPerformance testing with 4 threads (2 producers, 2 consumers)...\n");
     performance_test();
-
 #endif
-    return 0;
 }

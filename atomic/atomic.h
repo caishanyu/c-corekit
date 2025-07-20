@@ -34,7 +34,7 @@ typedef struct{
 /*========== func ==========*/
 
 /* 测试原子计数器 */
-int test_atomic_counter();
+void test_atomic_counter(void **state);
 
 /* spin_lock */
 // 动态初始化函数
@@ -46,14 +46,18 @@ bool spinlock_trylock(spinlock_t *lock);
 // 释放锁
 void spinlock_unlock(spinlock_t *lock);
 // 测试原子自旋锁
-int test_aotmic_spinlock();
+void test_aotmic_spinlock(void **state);
 
 /* lockFreeQueue */
 // 初始化队列
 STATUS queue_init(LockFreeQueue* q);
 // 入队
 STATUS enqueue(LockFreeQueue *q, void *data);
+// 出队操作
+void* dequeue(LockFreeQueue* q);
+// 销毁队列
+STATUS queue_close(LockFreeQueue* q);
 // 测试
-int test_lock_free_queue();
+void test_lock_free_queue(void **state);
 
 #endif

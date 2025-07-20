@@ -10,7 +10,9 @@ static void* thread_func(void* arg) {
     return 0;
 }
 
-int test_atomic_counter() {
+void test_atomic_counter(void **state)
+{
+    (void)state;
 #if SELF_TEST
     pthread_t t1 = 0;
     pthread_t t2 = 0;
@@ -20,7 +22,7 @@ int test_atomic_counter() {
     pthread_join(t1, NULL);
     pthread_join(t2, NULL);
     
-    printf("Final count: %ld\n", atomic_load(&counter));
+    assert_int_equal(counter, 1000000*2);
 #endif
     return 0;
 }

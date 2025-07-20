@@ -50,8 +50,9 @@ static int thread_func(void *arg) {
     return 0;
 }
 
-int test_aotmic_spinlock()
+void test_aotmic_spinlock(void **state)
 {
+    (void)state;    // 避免未使用警告
 #if SELF_TEST
     thrd_t t1, t2;
     
@@ -61,7 +62,6 @@ int test_aotmic_spinlock()
     thrd_join(t1, NULL);
     thrd_join(t2, NULL);
     
-    printf("Final counter: %d\n", shared_counter); // 应为2000000
+    assert_int_equal(shared_counter, 1000000*2);
 #endif
-    return 0;
 }
