@@ -8,6 +8,8 @@
 #include <threads.h> // C11标准支持的线程库
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
 
 /*========== type ==========*/
 
@@ -15,6 +17,17 @@
 typedef struct {
     atomic_flag lock_flag;  // 0-锁空闲，1-锁被占用
 } spinlock_t;
+
+// 无锁队列节点结构
+typedef struct Node{
+    void *data;
+    _Atomic(struct Node*) next;
+}Node;
+// 无锁队列结构
+typedef struct{
+    _Atomic(Node*) head;
+    _Atomic(Node*) tail;
+}LockFreeQueue;
 
 /*========== func ==========*/
 
@@ -32,5 +45,13 @@ bool spinlock_trylock(spinlock_t *lock);
 void spinlock_unlock(spinlock_t *lock);
 // 测试原子自旋锁
 int test_aotmic_spinlock();
+
+/* lockFreeQueue */
+// 初始化队列
+STATUS queue_init(LockFreeQueue* q);
+// 入队
+STATUS enqueue(LockFreeQueue *q, void *data);
+// 测试
+int test_lock_free_queue();
 
 #endif

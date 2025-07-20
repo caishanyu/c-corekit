@@ -6,5 +6,7 @@ int main()
     
     test_aotmic_spinlock();
 
+    test_lock_free_queue();
+
     return 0;
 }

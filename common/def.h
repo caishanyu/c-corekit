@@ -3,4 +3,10 @@
 
 #define SELF_TEST   (1)
 
+typedef enum
+{
+    ERROR = -1,
+    OK = 0,
+}STATUS;
+
 #endif
