@@ -1,6 +1,8 @@
 #ifndef _ATOMIC_H_
 #define _ATOMIC_H_
 
+#define _POSIX_C_SOURCE 200112L
+
 #include "def.h"
 
 #include <stdatomic.h>

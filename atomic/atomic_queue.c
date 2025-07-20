@@ -183,12 +183,12 @@ void* consumer(void* arg) {
 void performance_test() {
     LockFreeQueue q;
     queue_init(&q);
-    
+
     const int num_threads = 4;
     pthread_t threads[num_threads];
     
     struct timespec start, end;
-    //clock_gettime(CLOCK_MONOTONIC, &start);
+    clock_gettime(CLOCK_MONOTONIC, &start);
     
     // 创建生产者线程
     for (int i = 0; i < num_threads/2; i++) {
@@ -205,11 +205,11 @@ void performance_test() {
         pthread_join(threads[i], NULL);
     }
     
-    //clock_gettime(CLOCK_MONOTONIC, &end);
+    clock_gettime(CLOCK_MONOTONIC, &end);
     
-    //double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
     
-    //printf("MPMC performance: %.2f ops/sec\n", (num_threads * 1000) / elapsed);
+    printf("MPMC performance: %.2f ops/sec\n", (num_threads * 1000) / elapsed);
 }
 
 #endif
