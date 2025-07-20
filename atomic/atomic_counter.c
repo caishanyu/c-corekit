@@ -1,10 +1,8 @@
-#include <stdatomic.h>
-#include <pthread.h>
-#include <stdio.h>
+#include "atomic.h"
 
 atomic_long counter = ATOMIC_VAR_INIT(0);  // 静态初始化
 
-void* thread_func(void* arg) {
+static void* thread_func(void* arg) {
     for (int i = 0; i < 1000000; i++) {
         // 原子自增操作
         atomic_fetch_add_explicit(&counter, 1, memory_order_relaxed);
@@ -12,7 +10,8 @@ void* thread_func(void* arg) {
     return 0;
 }
 
-int main() {
+int test_atomic_counter() {
+#if SELF_TEST
     pthread_t t1 = 0;
     pthread_t t2 = 0;
     pthread_create(&t1, NULL, thread_func, NULL);
@@ -22,5 +21,6 @@ int main() {
     pthread_join(t2, NULL);
     
     printf("Final count: %ld\n", atomic_load(&counter));
+#endif
     return 0;
 }
