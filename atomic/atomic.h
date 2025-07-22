@@ -31,6 +31,12 @@ typedef struct{
     _Atomic(Node*) tail;
 }LockFreeQueue;
 
+// 自旋读写锁结构
+typedef struct {
+    atomic_uint state;       // 原子状态：高1位=写者标志，低31位=读者计数
+    atomic_flag writer_lock; // 写者互斥锁（自旋锁）
+} rw_spinlock_t;
+
 /*========== func ==========*/
 
 /* 测试原子计数器 */

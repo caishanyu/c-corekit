@@ -1,11 +1,10 @@
 #include "atomic.h"
-#include "def.h"
 
 // 初始化自旋锁（静态初始化）
 #define SPINLOCK_INIT { ATOMIC_FLAG_INIT }
 
 // 动态初始化函数
-void spinlock_init(spinlock_t *lock) {
+__attribute__((__always_inline__)) void spinlock_init(spinlock_t *lock) {
     atomic_flag_clear_explicit(&lock->lock_flag, memory_order_release);
 }
 
