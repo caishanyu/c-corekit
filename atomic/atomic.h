@@ -33,8 +33,8 @@ typedef struct{
 
 // 自旋读写锁结构
 typedef struct {
-    atomic_uint state;       // 原子状态：高1位=写者标志，低31位=读者计数
-    atomic_flag writer_lock; // 写者互斥锁（自旋锁）
+    int writer;         // 写者标志
+    int reader_count;   // 读者数量
 } rw_spinlock_t;
 
 /*========== func ==========*/
@@ -65,5 +65,17 @@ void* dequeue(LockFreeQueue* q);
 STATUS queue_close(LockFreeQueue* q);
 // 测试
 void test_lock_free_queue(void **state);
+
+/* rwlock */
+// 动态初始化
+void rwspinlock_init(rw_spinlock_t *lock);
+// 获取读锁
+void rwspinlock_r_take(rw_spinlock_t *lock);
+// 释放读锁
+void rwspinlock_r_give(rw_spinlock_t *lock);
+// 获取写锁
+void rwspinlock_w_take(rw_spinlock_t *lock);
+// 释放写锁
+void rwspinlock_w_give(rw_spinlock_t *lock);
 
 #endif

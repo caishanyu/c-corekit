@@ -9,7 +9,11 @@ BIN_DIR := bin
 OBJ_DIR := obj
 
 # 源文件和目标文件
-SRCS := atomic/atomic_counter.c atomic/atomic_spin_lock.c atomic/atomic_queue.c main.c
+SRCS := atomic/atomic_counter.c		\
+		atomic/atomic_spin_lock.c 	\
+		atomic/atomic_queue.c		\
+		atomic/atomic_rwspin_lock.c \
+		main.c
 OBJS := $(SRCS:%.c=$(OBJ_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
