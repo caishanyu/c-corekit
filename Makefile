@@ -2,7 +2,7 @@
 CC      := gcc
 CFLAGS  := -std=c11 -pedantic -Wall -Wextra
 LDFLAGS := -lpthread -lrt -lcmocka
-INC     := -Icommon -Iatomic
+INC     := -Icommon -Iatomic -Ids
 
 # 目录设置
 BIN_DIR := bin
@@ -13,6 +13,7 @@ SRCS := atomic/atomic_counter.c		\
 		atomic/atomic_spin_lock.c 	\
 		atomic/atomic_queue.c		\
 		atomic/atomic_rwspin_lock.c \
+		ds/list/list.c				\
 		main.c
 OBJS := $(SRCS:%.c=$(OBJ_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
