@@ -16,9 +16,7 @@ int main()
     cmocka_run_group_tests(tests, NULL, NULL); // 运行测试组
 #endif
 
-    dlist *dl = NULL;
-    dl = dlist_create(5, NULL);
-    dlist_destroy(dl);
+    DBG("test main");
 
     return 0;
 }

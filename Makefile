@@ -9,7 +9,8 @@ BIN_DIR := bin
 OBJ_DIR := obj
 
 # 源文件和目标文件
-SRCS := atomic/atomic_counter.c		\
+SRCS := common/debug.c				\
+		atomic/atomic_counter.c		\
 		atomic/atomic_spin_lock.c 	\
 		atomic/atomic_queue.c		\
 		atomic/atomic_rwspin_lock.c \
