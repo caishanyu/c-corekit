@@ -33,6 +33,8 @@ typedef struct _dlist_ops
     STATUS (*dlist_get_size)(dlist*, unsigned int *);   // 获取长度
     /* add */
     STATUS (*dlist_insert)(dlist*, unsigned int, void*);    // 插入节点
+    /* del */
+    STATUS (*dlist_remove)(dlist*, unsigned int);   // 移除元素
 }dlist_ops;
 
 /*
@@ -94,8 +96,9 @@ static inline STATUS dlist_append_tail(
 )
 {
     unsigned int len = 0;
-    dlist_operations.dlist_get_size(dl, &len);
-    return dlist_operations.dlist_insert(dl, len+1, data);
+    STATUS val = 0;
+    val = dlist_operations.dlist_get_size(dl, &len);
+    return val || dlist_operations.dlist_insert(dl, len+1, data);
 }
 
 // 插入链表头部
@@ -105,6 +108,34 @@ static inline STATUS dlist_append_head(
 )
 {
     return dlist_operations.dlist_insert(dl, 1, data);
+}
+
+// 移除idx位置元素
+static inline STATUS dlist_remove(
+    IN dlist *dl,
+    IN unsigned int idx
+)
+{
+    return dlist_operations.dlist_remove(dl, idx);
+}
+
+// 移除链表头元素
+static inline STATUS dlist_remove_head(
+    IN dlist *dl
+)
+{
+    return dlist_operations.dlist_remove(dl, 1);
+}
+
+// 移除链表尾元素
+static inline STATUS dlist_remove_tail(
+    IN dlist *dl
+)
+{
+    unsigned int len = 0;
+    STATUS val = 0;
+    val = dlist_operations.dlist_get_size(dl, &len);
+    return val || dlist_operations.dlist_remove(dl, len);
 }
 
 #endif

@@ -37,6 +37,7 @@ typedef enum
     /* DLIST模块错误码 */
     ERR_DLIST_START = 1000,
     ERR_DLIST_FULL,         // DLIST已满
+    ERR_DLIST_EMPTY,        // DLIST空
     ERR_DLIST_IDX_ERROR,    // IDX相关错误
 }STATUS;
 

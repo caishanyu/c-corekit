@@ -251,6 +251,69 @@ static STATUS _dlist_insert(IN dlist *l, IN unsigned int idx, IN void *data)
     return OK;
 }
 
+// 移除元素
+static STATUS _dlist_remove(dlist *dl, unsigned int idx)
+{
+    dlist_node *prior = NULL;
+    dlist_node *next = NULL;
+    dlist_node *node = NULL;
+    unsigned int i = 0;
+
+    if(unlikely(!dl))
+    {
+        return ERR_BAD_PARAM;
+    }
+
+    DLIST_LOCK(dl);
+
+    // 空队列不允许移除
+    if(0 == dl->size)
+    {
+        DLIST_UNLOCK(dl);
+        return ERR_DLIST_EMPTY;
+    }
+
+    // 检查idx合法性
+    if(idx < 1 || idx > dl->size)
+    {
+        DLIST_UNLOCK(dl);
+        return ERR_DLIST_IDX_ERROR;
+    }
+
+    // 找到删除节点的前后
+    prior = dl->head;
+    while(i < (idx - 1))
+    {
+        prior = prior->next;
+        ++ i;
+    }
+    node = prior->next;
+    next = node->next;
+
+    // 调整
+    prior->next = next;
+    if(next)
+    {
+        next->prior = prior;
+    }
+
+    // 移除node，释放内存
+    dlist_node_destroy(node);
+
+    // 调整tail
+    if(idx == dl->size)
+    {
+        dl->tail = prior;
+    }
+
+    // 调整长度
+    dl->size -= 1;
+
+    DLIST_UNLOCK(dl);
+
+    return OK;
+}
+
 /*
     Variables
 */
@@ -261,4 +324,5 @@ dlist_ops dlist_operations = {
     .dlist_display = _dlist_display,
     .dlist_get_size = _dlist_get_size,
     .dlist_insert = _dlist_insert,
+    .dlist_remove = _dlist_remove,
 };

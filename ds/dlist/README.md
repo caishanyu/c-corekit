@@ -55,6 +55,24 @@ dlist_append_tail / dlist_append_head
 
 内部基于dlist_insert，提供头插/尾插接口
 
+### dlist_remove / dlist_remove_head / dlist_remove_tail
+
+dlist_remove
+
+- 功能：链表移除元素
+- 输入参数：（1）指向链表的指针（2）移除元素的序号
+- 输出参数：N/A
+- 返回值：操作错误码
+
+链表移除原理：
+1. 找到移除位置的前后节点
+2. 修改前后节点的next/prior，跳过移除的元素
+3. 注意边界情况的处理：（1）移除尾部，需要移动尾指针
+
+dlist_remove_head / dlist_remove_tail
+
+内部基于dlist_remove，提供头/尾移除接口
+
 ## 内存管理
 
 链表无法得知存储数据的大小及来源，所以由调用模块自行管理数据内存
