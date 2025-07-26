@@ -1,5 +1,5 @@
 #include "atomic/atomic.h"
-#include "ds/list/list.h"
+#include "ds/dlist/dlist.h"
 
 int main()
 {

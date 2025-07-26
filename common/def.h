@@ -33,6 +33,11 @@ typedef enum
     ERR_BAD_PARAM,      // 输入参数错误
     ERR_NO_MEMORY,      // 内存不足
     ERR_API_ERROR,      // API报错
+
+    /* DLIST模块错误码 */
+    ERR_DLIST_START = 1000,
+    ERR_DLIST_FULL,         // DLIST已满
+    ERR_DLIST_IDX_ERROR,    // IDX相关错误
 }STATUS;
 
 #if SELF_TEST
