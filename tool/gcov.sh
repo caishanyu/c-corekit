@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# dlist
 echo "[enter dlist path]"
 cd obj/ds/dlist
 
@@ -8,6 +9,25 @@ ln -s ../../../ds/dlist/dlist.c .
 
 echo "[generate dlist gcov]"
 gcov dlist.c
+
+# 收集数据
+lcov --capture --directory . --output-file coverage.info
+
+# 生成HTML
+genhtml coverage.info  --output-directory coverage_report
+
+echo "[return top path]"
+cd -
+
+# queue
+echo "[enter queue path]"
+cd obj/ds/queue
+
+echo "[generate soft link to src files]"
+ln -s ../../../ds/queue/queue.c .
+
+echo "[generate queue gcov]"
+gcov queue.c
 
 # 收集数据
 lcov --capture --directory . --output-file coverage.info

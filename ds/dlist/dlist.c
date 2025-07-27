@@ -248,15 +248,6 @@ static STATUS _dlist_insert(IN dlist *l, IN unsigned int idx, IN void *data)
         return ERR_DLIST_IDX_ERROR;
     }
 
-    // 找到插入位置前一个节点，移动idx-1步
-    prior = l->head;
-    while(i < (idx - 1))
-    {
-        prior = prior->next;
-        ++ i;
-    }
-    next = prior->next;
-
     // 创建新节点，用于存储data
     node = dlist_node_create();
     if(unlikely(NULL == node))
@@ -265,6 +256,38 @@ static STATUS _dlist_insert(IN dlist *l, IN unsigned int idx, IN void *data)
         return ERR_NO_MEMORY;
     }
     node->data = data;
+
+    // 特殊处理尾插，为queue/stack提速
+    if(l->size == 0)
+    {
+        l->head->next = node;
+        l->tail = node;
+        node->prior = l->head;
+        node->next = NULL;
+        ++ l->size;
+        DLIST_UNLOCK(l);
+        return OK;
+    }
+    else if(idx == (l->size+1))
+    {
+        prior = l->tail;
+        node->prior = prior;
+        node->next = NULL;
+        prior->next = node;
+        l->tail = node;
+        ++ l->size;
+        DLIST_UNLOCK(l);
+        return OK;
+    }
+
+    // 找到插入位置前一个节点，移动idx-1步
+    prior = l->head;
+    while(i < (idx - 1))
+    {
+        prior = prior->next;
+        ++ i;
+    }
+    next = prior->next;
 
     // 更改next/prior域
     node->prior = prior;
