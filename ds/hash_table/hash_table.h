@@ -1,0 +1,55 @@
+#ifndef _HASH_TABLE_H
+#define _HASH_TABLE_H
+
+/*
+    Include files
+*/
+
+#include "dlist/dlist.h"
+
+/*
+    typedefs
+*/
+
+// 哈希函数指针
+typedef unsigned int (*hash_func)(void *data);
+// 打印节点函数指针
+typedef dlist_show_func hash_table_show_func;
+// 哈希表声明，隐藏成员
+typedef struct hash_table hash_table;
+// 哈希表操作集合
+typedef struct
+{
+    // 创建哈希表
+    hash_table* (*hash_table_create)(unsigned int, hash_func, hash_table_show_func);
+    // 销毁哈希表
+    STATUS (*hash_table_destroy)(hash_table*);
+}hash_table_ops;
+
+/*
+    Extern symbols
+*/
+
+extern hash_table_ops hash_table_operations;
+
+/*
+    Functions
+*/
+
+// 创建哈希表
+static inline hash_table* hash_table_create(
+    IN unsigned int bucket_size,
+    IN hash_func hash,
+    IN hash_table_show_func show
+)
+{
+    return hash_table_operations.hash_table_create(bucket_size, hash, show);
+}
+
+// 销毁哈希表
+static inline STATUS hash_table_destroy(IN hash_table *hs)
+{
+    return hash_table_operations.hash_table_destroy(hs);
+}
+
+#endif
