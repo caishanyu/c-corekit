@@ -6,6 +6,7 @@
 
 - 双链表包含一个哑节点，用于简化处理，头指针始终指向哑节点
 - 链表空时，尾指针指向哑节点；否则指向最后一个元素
+- 注意数据节点的idx，从1开始
 
 ## API
 
@@ -37,9 +38,20 @@
 - 输出参数：长度
 - 返回值：操作错误码
 
+### dlist_get_data / dlist_get_head / dlist_get_tail
+
+`dlist_get_data`
+
+- 功能：获取链表某一位置的元素，copy给输出参数data
+- 输入参数：（1）指向链表的指针（2）节点的序号（4）数据的长度，用于拷贝
+- 输出参数：（3）指向数据的指针data
+- 返回值：操作错误码
+
+内部基于`dlist_get_data`，提供返回头部/尾部元素数据的接口
+
 ### dlist_insert / dlist_append_tail / dlist_append_head
 
-dlist_insert
+`dlist_insert`
 
 - 功能：链表插入元素
 - 输入参数：（1）指向链表的指针（2）插入后节点的序号（3）data
@@ -51,13 +63,13 @@ dlist_insert
 2. 修改前后节点，以及新节点的next/prior
 3. 注意边界情况的处理：（1）插入尾部，需要移动尾指针
 
-dlist_append_tail / dlist_append_head
+`dlist_append_tail` / `dlist_append_head`
 
-内部基于dlist_insert，提供头插/尾插接口
+内部基于`dlist_insert`，提供头插/尾插接口
 
 ### dlist_remove / dlist_remove_head / dlist_remove_tail
 
-dlist_remove
+`dlist_remove`
 
 - 功能：链表移除元素
 - 输入参数：（1）指向链表的指针（2）移除元素的序号
@@ -69,9 +81,9 @@ dlist_remove
 2. 修改前后节点的next/prior，跳过移除的元素
 3. 注意边界情况的处理：（1）移除尾部，需要移动尾指针
 
-dlist_remove_head / dlist_remove_tail
+`dlist_remove_head` / `dlist_remove_tail`
 
-内部基于dlist_remove，提供头/尾移除接口
+内部基于`dlist_remove`，提供头/尾移除接口
 
 ## 内存管理
 

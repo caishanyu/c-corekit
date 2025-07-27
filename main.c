@@ -3,7 +3,7 @@
 
 int main()
 {
-#if SELF_TEST
+#if CMOCKA_TEST
     const struct CMUnitTest tests[] = {
         cmocka_unit_test(test_atomic_counter),  // 注册测试用例
         cmocka_unit_test(test_aotmic_spinlock),

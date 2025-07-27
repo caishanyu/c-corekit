@@ -191,6 +191,40 @@ static STATUS _dlist_get_size(IN dlist *l, OUT unsigned int *size)
     return OK;
 }
 
+// 获取链表idx位置元素data
+static STATUS _dlist_get_data(dlist *dl, unsigned int idx, void *data, unsigned int len)
+{
+    unsigned int i = 0;
+    dlist_node *ptr = NULL;
+
+    if(unlikely(NULL == dl || NULL == data || 0 == len))
+    {
+        return ERR_BAD_PARAM;
+    }
+
+    DLIST_LOCK(dl);
+
+    // 检查idx合法性
+    if(idx > dl->size || idx < 1)
+    {
+        DLIST_UNLOCK(dl);
+        return ERR_DLIST_IDX_ERROR;
+    }
+
+    ptr = dl->head;
+    for(; i < idx; ++ i)
+        ptr = ptr->next;
+    
+    if(ptr->data)
+        memcpy(data, ptr->data, len);
+    else
+        DBG("idx %d, pdata is NULL", idx);
+
+    DLIST_UNLOCK(dl);
+
+    return OK;
+}
+
 // 插入节点，使其成为idx位置
 static STATUS _dlist_insert(IN dlist *l, IN unsigned int idx, IN void *data)
 {
@@ -323,6 +357,7 @@ dlist_ops dlist_operations = {
     .dlist_destroy = _dlist_destroy,
     .dlist_display = _dlist_display,
     .dlist_get_size = _dlist_get_size,
+    .dlist_get_data = _dlist_get_data,
     .dlist_insert = _dlist_insert,
     .dlist_remove = _dlist_remove,
 };

@@ -1,13 +1,13 @@
 #ifndef __DEF__H
 #define __DEF__H
 
-#define SELF_TEST   (1)
+#define CMOCKA_TEST (1)
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
-#if SELF_TEST
+#if CMOCKA_TEST
 #include <stdarg.h>
 #include <stddef.h>
 #include <setjmp.h>
@@ -41,7 +41,7 @@ typedef enum
     ERR_DLIST_IDX_ERROR,    // IDX相关错误
 }STATUS;
 
-#if SELF_TEST
+#if CMOCKA_TEST
 #define malloc(size) _test_malloc(size, __FILE__, __LINE__)
 #define free(ptr)    _test_free(ptr, __FILE__, __LINE__)
 #endif

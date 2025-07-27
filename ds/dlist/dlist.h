@@ -31,6 +31,7 @@ typedef struct _dlist_ops
     STATUS (*dlist_display)(dlist*, DLIST_ORDER_TYPE);            // 打印链表
     /* get */
     STATUS (*dlist_get_size)(dlist*, unsigned int *);   // 获取长度
+    STATUS (*dlist_get_data)(dlist*, unsigned int, void*, unsigned int);    // 获取元素
     /* add */
     STATUS (*dlist_insert)(dlist*, unsigned int, void*);    // 插入节点
     /* del */
@@ -79,6 +80,39 @@ static inline STATUS dlist_get_size(
     return dlist_operations.dlist_get_size(dl, size);
 }
 
+// 获取idx位置元素
+static inline STATUS dlist_get_data(
+    IN dlist* dl,
+    IN unsigned int idx,
+    IN OUT void *data,
+    IN unsigned int len
+)
+{
+    return dlist_operations.dlist_get_data(dl, idx, data, len);
+}
+
+// 获取第一个数据元素
+static inline STATUS dlist_get_head(
+    IN dlist *dl,
+    IN OUT void *data,
+    IN unsigned int len
+)
+{
+    return dlist_operations.dlist_get_data(dl, 1, data, len);
+}
+
+// 获取最后一个数据元素
+static inline STATUS dlist_get_tail(
+    IN dlist *dl,
+    IN OUT void *data,
+    IN unsigned int len
+)
+{
+    unsigned int dl_len = 0;
+    STATUS val = dlist_operations.dlist_get_size(dl, &dl_len);
+    return val || dlist_operations.dlist_get_data(dl, 1, data, len);
+}
+
 // 插入
 static inline STATUS dlist_insert(
     IN dlist *dl,
@@ -96,8 +130,7 @@ static inline STATUS dlist_append_tail(
 )
 {
     unsigned int len = 0;
-    STATUS val = 0;
-    val = dlist_operations.dlist_get_size(dl, &len);
+    STATUS val = dlist_operations.dlist_get_size(dl, &len);
     return val || dlist_operations.dlist_insert(dl, len+1, data);
 }
 
@@ -133,8 +166,7 @@ static inline STATUS dlist_remove_tail(
 )
 {
     unsigned int len = 0;
-    STATUS val = 0;
-    val = dlist_operations.dlist_get_size(dl, &len);
+    STATUS val = dlist_operations.dlist_get_size(dl, &len);
     return val || dlist_operations.dlist_remove(dl, len);
 }
 
