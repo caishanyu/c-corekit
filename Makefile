@@ -1,7 +1,7 @@
 # 编译器和标志
 CC      := gcc
-CFLAGS  := -std=c11 -pedantic -Wall -Wextra
-LDFLAGS := -lpthread -lrt -lcmocka
+CFLAGS  := -std=c11 -pedantic -Wall -Wextra -fprofile-arcs -ftest-coverage -g
+LDFLAGS := -lpthread -lrt -lcmocka -lgcov
 INC     := -Icommon -Iatomic -Ids
 
 # 目录设置

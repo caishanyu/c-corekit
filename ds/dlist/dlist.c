@@ -103,7 +103,7 @@ static dlist* _dlist_create(
     dl->size = 0;
     dl->show_func = show_func;
 
-    DBG("dl create ok: %p\r\n", (void*)dl);
+    DBG("dl create ok: %p", (void*)dl);
     return dl;
 
 error:
@@ -139,7 +139,7 @@ static STATUS _dlist_destroy(dlist* dl)
     // 销毁链表结构
     free(dl);
 
-    DBG("destory dl %p ok\r\n", (void*)dl);
+    DBG("destory dl %p ok", (void*)dl);
 
     return OK;
 }
@@ -157,6 +157,7 @@ static STATUS _dlist_display(IN dlist *l, IN DLIST_ORDER_TYPE order)
 
     DLIST_LOCK(l);
 
+    printf("Dlist %p, %s:\r\n", (void*)l, DLIST_ORDER == order ? "order" : "reverse");
     ptr = DLIST_ORDER == order ?
                          l->head->next:
                          l->tail;
@@ -165,13 +166,13 @@ static STATUS _dlist_display(IN dlist *l, IN DLIST_ORDER_TYPE order)
             (ptr != l->head)
     )
     {
-        printf("Dlist Node NO.%d:\r\n", ++ count);
         l->show_func(ptr->data);
-        printf("\r\n========\r\n");
+        printf("(%d)-->", ++ count);
         ptr = DLIST_ORDER == order ? 
                             ptr->next:
                             ptr->prior;
     }
+    printf("\r\n====\r\n");
 
     DLIST_UNLOCK(l);
 
@@ -361,3 +362,86 @@ dlist_ops dlist_operations = {
     .dlist_insert = _dlist_insert,
     .dlist_remove = _dlist_remove,
 };
+
+// 测试接口
+#if DLIST_TEST
+static void test_show_func(void* data)
+{
+    printf("%d", *((int*)data));
+}
+void dlist_test()
+{
+#if CMOCKA_TEST
+    dlist *dl = dlist_create(test_show_func);
+    assert_non_null(dl);
+    int a[10] = {0,1,2,3,4,5,6,7,8,9};
+    int data = 0;
+    unsigned int len = sizeof(int);
+    unsigned int dl_len = 0;
+
+    assert_int_not_equal(OK, dlist_remove_head(dl));
+
+    assert_return_code(OK, dlist_append_head(dl, &a[0]));
+    assert_return_code(OK, dlist_append_head(dl, &a[1]));
+    assert_return_code(OK, dlist_append_tail(dl, &a[2]));
+    // 1->0->2
+
+    assert_return_code(OK, dlist_get_head(dl, &data, len));
+    assert_int_equal(1, data);
+    assert_return_code(OK, dlist_get_tail(dl, &data, len));
+    assert_int_equal(2, data);
+    assert_return_code(OK, dlist_get_data(dl, 1, &data, len));
+    assert_int_equal(1, data);
+    assert_return_code(OK, dlist_get_data(dl, 2, &data, len));
+    assert_int_equal(0, data);
+    assert_return_code(OK, dlist_get_data(dl, 3, &data, len));
+    assert_int_equal(2, data);
+
+    // fail 
+    assert_int_not_equal(OK, dlist_append_head(NULL, &a[0]));
+    assert_int_not_equal(OK, dlist_append_tail(NULL, &a[1]));
+    assert_int_not_equal(OK, dlist_insert(dl, 0, &a[2]));
+    assert_int_not_equal(OK, dlist_insert(NULL, 0, &a[2]));
+    assert_int_not_equal(OK, dlist_insert(dl, 5, &a[2]));
+    assert_int_not_equal(OK, dlist_remove_head(NULL));
+    assert_int_not_equal(OK, dlist_remove_tail(NULL));
+    assert_int_not_equal(OK, dlist_remove(NULL, 0));
+    assert_int_not_equal(OK, dlist_remove(dl, 0));
+    assert_int_not_equal(OK, dlist_get_size(NULL, &dl_len));
+    assert_int_not_equal(OK, dlist_get_size(dl, NULL));
+    assert_int_not_equal(OK, dlist_get_data(NULL, 1, &data, len));
+    assert_int_not_equal(OK, dlist_get_data(dl, 0, &data, len));
+    assert_int_not_equal(OK, dlist_get_data(dl, 4, &data, len));
+    assert_int_not_equal(OK, dlist_get_data(dl, 1, NULL, len));
+    assert_int_not_equal(OK, dlist_get_data(dl, 1, &data, 0));
+
+    assert_return_code(OK, dlist_append_tail(dl, &a[3]));
+    assert_return_code(OK, dlist_append_tail(dl, &a[4]));
+    assert_return_code(OK, dlist_append_tail(dl, &a[5]));
+    // 1->0->2->3->4->5
+
+    assert_return_code(OK, dlist_get_size(dl, &dl_len));
+    assert_int_equal(6, dl_len);
+    assert_return_code(OK, dlist_remove_tail(dl));
+    assert_return_code(OK, dlist_remove_head(dl));
+    assert_return_code(OK, dlist_remove(dl, 3));
+    // 0->2->4
+    assert_return_code(OK, dlist_get_size(dl, &dl_len));
+    assert_int_equal(3, dl_len);
+    assert_return_code(OK, dlist_get_data(dl, 1, &data, len));
+    assert_int_equal(0, data);
+    assert_return_code(OK, dlist_get_data(dl, 2, &data, len));
+    assert_int_equal(2, data);
+    assert_return_code(OK, dlist_get_data(dl, 3, &data, len));
+    assert_int_equal(4, data);
+
+    // display
+    assert_int_not_equal(OK, dlist_display(NULL, DLIST_ORDER));
+    dlist_display(dl, DLIST_ORDER);
+    dlist_display(dl, DLIST_REVERSE);
+
+    assert_int_not_equal(OK, dlist_destroy(NULL));
+    assert_return_code(OK, dlist_destroy(dl));
+#endif
+}
+#endif

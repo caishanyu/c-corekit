@@ -56,7 +56,7 @@ static inline void _dbg_print(const char* timestamp, long ms,
 }
 
 // 调试打印开关
-#define DBG_ON  (1)
+#define DBG_ON  (0)
 
 #if DBG_ON
 // DBG打印，开启DBG_ON时有打印
@@ -74,7 +74,7 @@ static inline void _dbg_print(const char* timestamp, long ms,
 
 #else
 
-#define DBG(fmt, ...)
+#define DBG(...)    {}
 
 #endif
 

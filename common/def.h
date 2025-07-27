@@ -41,6 +41,16 @@ typedef enum
     ERR_DLIST_IDX_ERROR,    // IDX相关错误
 }STATUS;
 
+/*
+    模块调试宏
+*/
+
+#define DLIST_TEST  (1)
+
+/*
+    Cmocka测试框架宏
+*/
+
 #if CMOCKA_TEST
 #define malloc(size) _test_malloc(size, __FILE__, __LINE__)
 #define free(ptr)    _test_free(ptr, __FILE__, __LINE__)

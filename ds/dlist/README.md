@@ -4,6 +4,10 @@
 
 ## 内部细节
 
+双链表还是比较基础的数据结构，这里就不画图讲解了
+
+以下是本项目双链表的实现细节：
+
 - 双链表包含一个哑节点，用于简化处理，头指针始终指向哑节点
 - 链表空时，尾指针指向哑节点；否则指向最后一个元素
 - 注意数据节点的idx，从1开始
@@ -94,3 +98,16 @@
 ## 线程安全
 
 使用互斥锁保证线程安全，对于链表这种简单数据结构，使用粗粒度锁即可
+
+## 代码覆盖率测试
+
+提供了`dlist_test`接口进行测试，请确保正确安装环境
+
+配置可参考[gcov](https://github.com/caishanyu/notes/blob/main/cmocka.md)关于gcov的介绍
+
+执行步骤(c-corekit目录下)
+
+1. 确保相关宏`COMCKA_TEST`和`DLIST_TEST`开启
+2. 编译项目，并运行
+3. 运行./tool/gcov.sh
+4. 在obj/ds/dlist/coverage_report/index.html可查看测试情况

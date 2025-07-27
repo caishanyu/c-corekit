@@ -110,7 +110,7 @@ static inline STATUS dlist_get_tail(
 {
     unsigned int dl_len = 0;
     STATUS val = dlist_operations.dlist_get_size(dl, &dl_len);
-    return val || dlist_operations.dlist_get_data(dl, 1, data, len);
+    return val || dlist_operations.dlist_get_data(dl, dl_len, data, len);
 }
 
 // 插入
@@ -169,5 +169,10 @@ static inline STATUS dlist_remove_tail(
     STATUS val = dlist_operations.dlist_get_size(dl, &len);
     return val || dlist_operations.dlist_remove(dl, len);
 }
+
+// 测试接口
+#if DLIST_TEST
+void dlist_test();
+#endif
 
 #endif
