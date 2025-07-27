@@ -1,6 +1,7 @@
 #include "atomic/atomic.h"
 #include "ds/dlist/dlist.h"
 #include "ds/queue/queue.h"
+#include "ds/stack/stack.h"
 
 int main()
 {
@@ -18,6 +19,10 @@ int main()
 
 #if QUEUE_TEST
         cmocka_unit_test(queue_test),
+#endif
+        cmocka_unit_test(stack_test),
+#if STACK_TEST
+
 #endif
 
         // 可添加更多用例

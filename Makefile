@@ -16,6 +16,7 @@ SRCS := common/debug.c				\
 		atomic/atomic_rwspin_lock.c \
 		ds/dlist/dlist.c			\
 		ds/queue/queue.c			\
+		ds/stack/stack.c			\
 		main.c
 OBJS := $(SRCS:%.c=$(OBJ_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)

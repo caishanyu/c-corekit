@@ -37,3 +37,22 @@ genhtml coverage.info  --output-directory coverage_report
 
 echo "[return top path]"
 cd -
+
+# stack
+echo "[enter stack path]"
+cd obj/ds/stack
+
+echo "[generate soft link to src files]"
+ln -s ../../../ds/stack/stack.c .
+
+echo "[generate stack gcov]"
+gcov stack.c
+
+# 收集数据
+lcov --capture --directory . --output-file coverage.info
+
+# 生成HTML
+genhtml coverage.info  --output-directory coverage_report
+
+echo "[return top path]"
+cd -
