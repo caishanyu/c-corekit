@@ -1,7 +1,9 @@
+#include "def.h"
 #include "atomic/atomic.h"
 #include "ds/dlist/dlist.h"
 #include "ds/queue/queue.h"
 #include "ds/stack/stack.h"
+#include "ds/hash_table/hash_table.h"
 
 int main()
 {
@@ -20,9 +22,13 @@ int main()
 #if QUEUE_TEST
         cmocka_unit_test(queue_test),
 #endif
-        cmocka_unit_test(stack_test),
-#if STACK_TEST
 
+#if STACK_TEST
+        cmocka_unit_test(stack_test),
+#endif
+
+#if HASH_TABLE_TEST
+        cmocka_unit_test(hash_table_test),
 #endif
 
         // 可添加更多用例

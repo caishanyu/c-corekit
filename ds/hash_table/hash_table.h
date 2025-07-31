@@ -24,6 +24,8 @@ typedef struct
     hash_table* (*hash_table_create)(unsigned int, hash_func, hash_table_show_func);
     // 销毁哈希表
     STATUS (*hash_table_destroy)(hash_table*);
+    // 加入哈希表
+    STATUS (*hash_table_insert)(hash_table*, void*);
 }hash_table_ops;
 
 /*
@@ -51,5 +53,18 @@ static inline STATUS hash_table_destroy(IN hash_table *hs)
 {
     return hash_table_operations.hash_table_destroy(hs);
 }
+
+// 加入哈希表
+static inline STATUS hash_table_insert(
+    IN hash_table *hs,
+    IN void *data
+)
+{
+    return hash_table_operations.hash_table_insert(hs, data);
+}
+
+#if HASH_TABLE_TEST
+void hash_table_test();
+#endif
 
 #endif

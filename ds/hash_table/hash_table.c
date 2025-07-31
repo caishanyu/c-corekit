@@ -90,7 +90,7 @@ error:
 }
 
 // 销毁哈希表
-static STATUS _hash_table_destroy(hash_table *hs)
+static STATUS _hash_table_destroy(IN hash_table *hs)
 {
     unsigned int i = 0;
     STATUS rv = 0;
@@ -117,6 +117,38 @@ static STATUS _hash_table_destroy(hash_table *hs)
     return OK;
 }
 
+// 加入哈希表
+static STATUS _hash_table_insert(
+    IN hash_table *hs,
+    IN void *data
+)
+{
+    unsigned int hash_val = 0;
+    dlist *bucket = NULL;
+    STATUS ret = OK;
+
+    if(unlikely(!hs || !data))
+    {
+        return ERR_BAD_PARAM;
+    }
+
+    // 计算hash
+    hash_val = hs->hash(data) % hs->bucket_count;
+    // 找到对应桶
+    bucket = (dlist*)hs->bucket_list[hash_val];
+
+    // todo:是否允许数据重复
+
+    // 尾插到桶中
+    ret = dlist_append_tail(bucket, data);
+    if(OK != ret)
+    {
+        DBG("insert to dlist fail");
+    }
+
+    return ret;
+}
+
 /*
     Variables
 */
@@ -125,4 +157,44 @@ static STATUS _hash_table_destroy(hash_table *hs)
 hash_table_ops hash_table_operations = {
     .hash_table_create = _hash_table_create,
     .hash_table_destroy = _hash_table_destroy,
+    .hash_table_insert = _hash_table_insert,
 };
+
+// 哈希表测试
+#if HASH_TABLE_TEST
+
+static inline unsigned int int_hash(void *data)
+{
+    return *((int*)data) / 11;
+}
+
+static void int_display(void* data)
+{
+    printf("%d", *((int*)data));
+}
+
+void hash_table_test()
+{
+#if CMOCKA_TEST
+    hash_table *hs = NULL;
+    int a[5] = {0,1,2,3,4};
+    int i = 0;
+
+    assert_null(hash_table_create(0, int_hash, NULL));
+    assert_null(hash_table_create(12, NULL, NULL));
+    hs = hash_table_create(12, int_hash, int_display);
+    assert_non_null(hs);
+
+    assert_int_not_equal(OK, hash_table_insert(NULL, &a[0]));
+    assert_int_not_equal(OK, hash_table_insert(hs, NULL));
+
+    for(i=0; i<5; ++i)
+    {
+        assert_return_code(OK, hash_table_insert(hs, &a));
+    }
+
+    assert_int_not_equal(OK, hash_table_destroy(NULL));
+    assert_return_code(OK, hash_table_destroy(hs));
+#endif
+}
+#endif
