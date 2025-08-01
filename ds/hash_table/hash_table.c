@@ -255,6 +255,30 @@ static STATUS _hash_table_get_size(
     return OK;
 }
 
+// 打印哈希表
+static void _hash_table_display(
+    IN hash_table *hs
+)
+{
+    unsigned int i = 0;
+
+    if(unlikely(!hs))
+    {
+        DBG("bad param");
+        return;
+    }
+
+    HS_LOCK(hs);
+
+    for(; i < hs->bucket_count; ++ i)
+    {
+        printf("bucket %d:\r\n", i);
+        dlist_display((dlist*)hs->bucket_list[i], DLIST_ORDER);
+    }
+
+    HS_UNLOCK(hs);
+}
+
 /*
     Variables
 */
@@ -267,6 +291,7 @@ hash_table_ops hash_table_operations = {
     .hash_table_remove = _hash_table_remove,
     .hash_table_contain = _hash_table_contain,
     .hash_table_get_size = _hash_table_get_size,
+    .hash_table_display = _hash_table_display,
 };
 
 // 哈希表测试
@@ -274,7 +299,7 @@ hash_table_ops hash_table_operations = {
 
 static inline unsigned int int_hash(void *data)
 {
-    return *((int*)data) / 11;
+    return *((int*)data) % 11;
 }
 
 static void int_display(void* data)
@@ -318,6 +343,8 @@ void hash_table_test()
         assert_return_code(OK, hash_table_insert(hs, &a[i]));
     }
 
+    hash_table_display(hs);
+
     assert_return_code(OK, hash_table_get_size(hs, &size));
     assert_int_equal(5, size);
 
@@ -326,6 +353,8 @@ void hash_table_test()
     assert_return_code(false, hash_table_contain(NULL, &a[0]));
     assert_return_code(false, hash_table_contain(hs, NULL));
     assert_return_code(false, hash_table_contain(hs, &b));
+
+    hash_table_display(hs);
 
     assert_int_not_equal(OK, hash_table_remove(NULL, &b));
     assert_int_not_equal(OK, hash_table_remove(hs, NULL));
