@@ -5,6 +5,7 @@
     Include Files
 */
 #include <pthread.h>
+#include <stdbool.h>
 #include "def.h"
 
 /*
@@ -15,6 +16,7 @@ typedef struct _dlist dlist;  // 隐藏成员
 
 // 函数指针
 typedef void (*dlist_show_func)(void *data);
+typedef bool (*dlist_cmp_func)(void *d1, void *d2);
 
 // 遍历顺序
 typedef enum
@@ -26,7 +28,7 @@ typedef enum
 // 链表操作
 typedef struct _dlist_ops
 {
-    dlist* (*dlist_create)(dlist_show_func);   // 创建
+    dlist* (*dlist_create)(dlist_show_func, dlist_cmp_func);   // 创建
     STATUS (*dlist_destroy)(dlist*);          // 销毁
     STATUS (*dlist_display)(dlist*, DLIST_ORDER_TYPE);            // 打印链表
     /* get */
@@ -36,6 +38,9 @@ typedef struct _dlist_ops
     STATUS (*dlist_insert)(dlist*, unsigned int, void*);    // 插入节点
     /* del */
     STATUS (*dlist_remove)(dlist*, unsigned int);   // 移除元素
+    STATUS (*dlist_remove_by_data)(dlist *, void *);
+    /* contain */
+    bool (*dlist_contain)(dlist*, void*);   // 检查链表中是否存在元素
 }dlist_ops;
 
 /*
@@ -50,10 +55,11 @@ extern dlist_ops dlist_operations;
 
 // 创建链表
 static inline dlist* dlist_create(
-    IN dlist_show_func show_func
+    IN dlist_show_func show_func,
+    IN dlist_cmp_func cmp_func
 )
 {
-    return dlist_operations.dlist_create(show_func);
+    return dlist_operations.dlist_create(show_func, cmp_func);
 }
 
 // 销毁链表
@@ -168,6 +174,23 @@ static inline STATUS dlist_remove_tail(
     unsigned int len = 0;
     STATUS val = dlist_operations.dlist_get_size(dl, &len);
     return val || dlist_operations.dlist_remove(dl, len);
+}
+
+static inline STATUS dlist_remove_by_data(
+    IN dlist *dl,
+    IN void *data
+)
+{
+    return dlist_operations.dlist_remove_by_data(dl, data);
+}
+
+// 检查链表是否存在元素
+static inline bool dlist_contain(
+    IN dlist *dl,
+    IN void *data
+)
+{
+    return dlist_operations.dlist_contain(dl, data);
 }
 
 // 测试接口

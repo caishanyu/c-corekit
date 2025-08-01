@@ -28,6 +28,7 @@ struct _dlist
     pthread_mutex_t mutex;      // 链表互斥锁
 
     dlist_show_func show_func;  // 打印数据
+    dlist_cmp_func  cmp_func;   // 比较元素值
 };
 
 /*
@@ -68,7 +69,8 @@ static inline void dlist_node_destroy(dlist_node *node)
 
 // 创建链表
 static dlist* _dlist_create(
-    dlist_show_func show_func
+    dlist_show_func show_func,
+    dlist_cmp_func cmp_func
 )
 {
     dlist *dl = NULL;
@@ -102,6 +104,7 @@ static dlist* _dlist_create(
     dl->tail = dummy;
     dl->size = 0;
     dl->show_func = show_func;
+    dl->cmp_func = cmp_func;
 
     DBG("dl create ok: %p", (void*)dl);
     return dl;
@@ -372,6 +375,73 @@ static STATUS _dlist_remove(dlist *dl, unsigned int idx)
     return OK;
 }
 
+// 根据元素值移除第一个元素（主要提供给哈希表使用）
+static STATUS _dlist_remove_by_data(dlist *dl, void *data)
+{
+    dlist_node *ptr = NULL;
+
+    if(unlikely(!dl || !dl->cmp_func || !data))
+    {
+        return ERR_BAD_PARAM;
+    }
+
+    DLIST_LOCK(dl);
+
+    ptr = dl->head->next;
+    while(ptr)
+    {
+        if(true == dl->cmp_func(data, ptr->data))
+        {
+
+            ptr->prior->next = ptr->next;
+            if(ptr->next)
+                ptr->next->prior = ptr->prior;
+            if(!ptr->next)
+                dl->tail = ptr->prior;
+
+            dlist_node_destroy(ptr);
+            -- dl->size;
+        
+            DLIST_UNLOCK(dl);
+            return OK;
+        }
+        ptr = ptr->next;
+    }
+
+    DLIST_UNLOCK(dl);
+
+    return ERR_DLIST_NODE_NOT_EXIST;
+}
+
+// 判断元素是否存在
+static bool _dlist_contain(dlist *dl, void *data)
+{
+    dlist_node *ptr = NULL;
+
+    if(unlikely(!dl || !dl->cmp_func || !data))
+    {
+        DBG("bad param");
+        return false;
+    }
+
+    DLIST_LOCK(dl);
+
+    ptr = dl->head->next;
+    while(ptr)
+    {
+        if(true == dl->cmp_func(data, ptr->data))
+        {
+            DLIST_UNLOCK(dl);
+            return true;
+        }
+        ptr = ptr->next;
+    }
+
+    DLIST_UNLOCK(dl);
+
+    return false;
+}
+
 /*
     Variables
 */
@@ -384,18 +454,25 @@ dlist_ops dlist_operations = {
     .dlist_get_data = _dlist_get_data,
     .dlist_insert = _dlist_insert,
     .dlist_remove = _dlist_remove,
+    .dlist_remove_by_data = _dlist_remove_by_data,
+    .dlist_contain = _dlist_contain,
 };
 
 // 测试接口
 #if DLIST_TEST
-static void test_show_func(void* data)
+static inline void test_show_func(void* data)
 {
     printf("%d", *((int*)data));
+}
+static inline bool test_cmp_func(void *d1, void *d2)
+{
+    if(!d1 || !d2)  return false;
+    return *(int*)d1 == *(int*)d2 ? true : false;
 }
 void dlist_test()
 {
 #if CMOCKA_TEST
-    dlist *dl = dlist_create(test_show_func);
+    dlist *dl = dlist_create(test_show_func, test_cmp_func);
     assert_non_null(dl);
     int a[10] = {0,1,2,3,4,5,6,7,8,9};
     int data = 0;

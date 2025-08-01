@@ -24,6 +24,7 @@ struct hash_table
 hash_table* _hash_table_create(
     IN unsigned int bucket_size,
     IN hash_func hash,
+    IN cmp_func cmp,
     IN hash_table_show_func show
 )
 {
@@ -31,7 +32,7 @@ hash_table* _hash_table_create(
     unsigned int i = 0;
     dlist *dl = NULL;
 
-    if(unlikely(bucket_size == 0 || NULL == hash))
+    if(unlikely(bucket_size == 0 || NULL == hash || NULL == cmp))
     {
         DBG("bad in param for create hash table");
         return NULL;
@@ -57,7 +58,7 @@ hash_table* _hash_table_create(
     // 每个桶创建一个链表指向
     for(i = 0; i < bucket_size; ++ i)
     {
-        dl = (void*)dlist_create(show);
+        dl = (void*)dlist_create(show, cmp);
         if(unlikely(NULL == dl))
         {
             DBG("malloc dlist of bucket [%lu] fail", i);
@@ -117,6 +118,27 @@ static STATUS _hash_table_destroy(IN hash_table *hs)
     return OK;
 }
 
+// 检查数据是否存在表中
+static bool _hash_table_contain(
+    IN hash_table *hs,
+    IN void *data
+)
+{
+    int hs_val = 0;
+    dlist *bucket = NULL;
+
+    if(unlikely(!hs || !data))
+    {
+        return false;
+    }
+
+    // 计算哈希值
+    hs_val = (hs->hash(data) % hs->bucket_count);
+    bucket = (dlist*)hs->bucket_list[hs_val];
+
+    return dlist_contain(bucket, data);
+}
+
 // 加入哈希表
 static STATUS _hash_table_insert(
     IN hash_table *hs,
@@ -137,7 +159,10 @@ static STATUS _hash_table_insert(
     // 找到对应桶
     bucket = (dlist*)hs->bucket_list[hash_val];
 
-    // todo:是否允许数据重复
+    if(true ==dlist_contain(bucket, data))
+    {
+        return ERR_HASH_TABLE_DATA_EXIST;
+    }
 
     // 尾插到桶中
     ret = dlist_append_tail(bucket, data);
@@ -149,6 +174,26 @@ static STATUS _hash_table_insert(
     return ret;
 }
 
+// 移除出哈希表
+static STATUS _hash_table_remove(
+    IN hash_table *hs,
+    IN void *data
+)
+{
+    unsigned int hv = 0;
+    dlist *bucket = NULL;
+
+    if(unlikely(!hs || !data))
+    {
+        return ERR_BAD_PARAM;
+    }
+
+    hv = hs->hash(data) % hs->bucket_count;
+    bucket = (dlist*)hs->bucket_list[hv];
+
+    return dlist_remove_by_data(bucket, data);
+}
+
 /*
     Variables
 */
@@ -158,6 +203,8 @@ hash_table_ops hash_table_operations = {
     .hash_table_create = _hash_table_create,
     .hash_table_destroy = _hash_table_destroy,
     .hash_table_insert = _hash_table_insert,
+    .hash_table_remove = _hash_table_remove,
+    .hash_table_contain = _hash_table_contain,
 };
 
 // 哈希表测试
@@ -173,16 +220,25 @@ static void int_display(void* data)
     printf("%d", *((int*)data));
 }
 
+static bool int_cmp(void *d1, void *d2)
+{
+    if(!d1 || !d2)  return false;
+    return *(int*)d1 == *(int*)d2;
+}
+
 void hash_table_test()
 {
 #if CMOCKA_TEST
     hash_table *hs = NULL;
     int a[5] = {0,1,2,3,4};
+    int b = 6;
+    int c = 98;
     int i = 0;
 
-    assert_null(hash_table_create(0, int_hash, NULL));
-    assert_null(hash_table_create(12, NULL, NULL));
-    hs = hash_table_create(12, int_hash, int_display);
+    assert_null(hash_table_create(0, int_hash, int_cmp, NULL));
+    assert_null(hash_table_create(12, NULL, int_cmp, NULL));
+    assert_null(hash_table_create(12, int_hash, NULL, NULL));
+    hs = hash_table_create(12, int_hash, int_cmp, int_display);
     assert_non_null(hs);
 
     assert_int_not_equal(OK, hash_table_insert(NULL, &a[0]));
@@ -190,8 +246,20 @@ void hash_table_test()
 
     for(i=0; i<5; ++i)
     {
-        assert_return_code(OK, hash_table_insert(hs, &a));
+        assert_return_code(OK, hash_table_insert(hs, &a[i]));
     }
+
+    for(i=0; i<5; ++i)
+        assert_return_code(true, hash_table_contain(hs, &a[i]));
+    assert_return_code(false, hash_table_contain(NULL, &a[0]));
+    assert_return_code(false, hash_table_contain(hs, NULL));
+    assert_return_code(false, hash_table_contain(hs, &b));
+
+    assert_int_not_equal(OK, hash_table_remove(NULL, &b));
+    assert_int_not_equal(OK, hash_table_remove(hs, NULL));
+    assert_int_not_equal(OK, hash_table_remove(hs, &c));
+    for(i=0; i<5; ++i)
+        assert_return_code(OK, hash_table_remove(hs, &a[i]));
 
     assert_int_not_equal(OK, hash_table_destroy(NULL));
     assert_return_code(OK, hash_table_destroy(hs));

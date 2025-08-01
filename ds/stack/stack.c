@@ -28,7 +28,7 @@ static stack* _stack_create(IN stack_show_func func)
         return NULL;
     }
 
-    s->dl = dlist_create(func);
+    s->dl = dlist_create(func, NULL);
     if(NULL == s->dl)
     {
         DBG("malloc base dlist fail");

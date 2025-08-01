@@ -40,6 +40,11 @@ typedef enum
     ERR_DLIST_FULL,         // DLIST已满
     ERR_DLIST_EMPTY,        // DLIST空
     ERR_DLIST_IDX_ERROR,    // IDX相关错误
+    ERR_DLIST_NODE_NOT_EXIST,   // 节点不存在
+
+    /* hash_table模块错误码 */
+    ERR_HASH_TABLE_START = 2000,
+    ERR_HASH_TABLE_DATA_EXIST,
 }STATUS;
 
 /*

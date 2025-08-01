@@ -28,7 +28,7 @@ static queue* _queue_create(IN queue_show_func func)
         return NULL;
     }
 
-    q->dl = dlist_create(func);
+    q->dl = dlist_create(func, NULL);
     if(NULL == q->dl)
     {
         DBG("malloc base dlist fail");
