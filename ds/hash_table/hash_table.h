@@ -33,6 +33,8 @@ typedef struct
     STATUS (*hash_table_remove)(hash_table*, void*);
     // 检查哈希表是否存在元素
     bool (*hash_table_contain)(hash_table*, void*);
+    // 获取哈希表元素数量
+    STATUS (*hash_table_get_size)(hash_table*, unsigned int*);
 }hash_table_ops;
 
 /*
@@ -87,6 +89,15 @@ static inline bool hash_table_contain(
 )
 {
     return hash_table_operations.hash_table_contain(hs, data);
+}
+
+// 获取哈希表元素数量
+static inline STATUS hash_table_get_size(
+    IN hash_table *hs,
+    OUT unsigned int *size
+)
+{
+    return hash_table_operations.hash_table_get_size(hs, size);
 }
 
 #if HASH_TABLE_TEST

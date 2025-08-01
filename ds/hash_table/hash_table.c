@@ -12,9 +12,20 @@
 struct hash_table
 {
     void** bucket_list;         // 桶链表
+    
+    pthread_mutex_t *mtx;       // 粗粒度锁
+    
     unsigned int bucket_count;  // 桶的数量
     hash_func hash; // 哈希函数
+
 };
+
+/*
+    Defines
+*/
+
+#define HS_LOCK(hs)     pthread_mutex_lock(hs->mtx)
+#define HS_UNLOCK(hs)   pthread_mutex_unlock(hs->mtx)
 
 /*
     Functions
@@ -68,6 +79,19 @@ hash_table* _hash_table_create(
         ht->bucket_list[i] = (void*)dl;
     }
 
+    // 初始化锁
+    ht->mtx = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+    if(unlikely(!ht->mtx))
+    {
+        DBG("malloc space of mutex fail");
+        goto error;
+    }
+    if(0 != pthread_mutex_init(ht->mtx, NULL))
+    {
+        DBG("init mutex fail");
+        goto error;
+    }
+
     ht->bucket_count = bucket_size;
     ht->hash = hash;
 
@@ -86,6 +110,7 @@ error:
         }
     }
     if(ht && ht->bucket_list) free(ht->bucket_list);
+    if(ht->mtx)   free(ht->mtx);
     if(ht)  free(ht);
     return NULL;
 }
@@ -113,6 +138,7 @@ static STATUS _hash_table_destroy(IN hash_table *hs)
     }
 
     free(hs->bucket_list);
+    free(hs->mtx);
     free(hs);
 
     return OK;
@@ -194,6 +220,41 @@ static STATUS _hash_table_remove(
     return dlist_remove_by_data(bucket, data);
 }
 
+// 获取哈希表元素总数
+static STATUS _hash_table_get_size(
+    IN hash_table *hs,
+    OUT unsigned int *size
+)
+{
+    unsigned int bucket_size = 0;
+    unsigned int i = 0;
+
+    if(unlikely(!hs || !size))
+    {
+        return ERR_BAD_PARAM;
+    }
+
+    *size = 0;
+
+    HS_LOCK(hs);
+
+    for(; i < hs->bucket_count; ++ i)
+    {
+        if(OK != dlist_get_size((dlist*)hs->bucket_list[i], &bucket_size))
+        {
+            HS_UNLOCK(hs);
+            *size = 0;
+            return ERROR;
+        }
+
+        *size += bucket_size;
+    }
+
+    HS_UNLOCK(hs);
+
+    return OK;
+}
+
 /*
     Variables
 */
@@ -205,6 +266,7 @@ hash_table_ops hash_table_operations = {
     .hash_table_insert = _hash_table_insert,
     .hash_table_remove = _hash_table_remove,
     .hash_table_contain = _hash_table_contain,
+    .hash_table_get_size = _hash_table_get_size,
 };
 
 // 哈希表测试
@@ -234,6 +296,7 @@ void hash_table_test()
     int b = 6;
     int c = 98;
     int i = 0;
+    unsigned int size = 0;
 
     assert_null(hash_table_create(0, int_hash, int_cmp, NULL));
     assert_null(hash_table_create(12, NULL, int_cmp, NULL));
@@ -244,10 +307,19 @@ void hash_table_test()
     assert_int_not_equal(OK, hash_table_insert(NULL, &a[0]));
     assert_int_not_equal(OK, hash_table_insert(hs, NULL));
 
+    assert_int_not_equal(OK, hash_table_get_size(NULL, &size));
+    assert_int_not_equal(OK, hash_table_get_size(hs, NULL));
+
+    assert_return_code(OK, hash_table_get_size(hs, &size));
+    assert_int_equal(0, size);
+
     for(i=0; i<5; ++i)
     {
         assert_return_code(OK, hash_table_insert(hs, &a[i]));
     }
+
+    assert_return_code(OK, hash_table_get_size(hs, &size));
+    assert_int_equal(5, size);
 
     for(i=0; i<5; ++i)
         assert_return_code(true, hash_table_contain(hs, &a[i]));
@@ -260,6 +332,14 @@ void hash_table_test()
     assert_int_not_equal(OK, hash_table_remove(hs, &c));
     for(i=0; i<5; ++i)
         assert_return_code(OK, hash_table_remove(hs, &a[i]));
+
+    assert_return_code(OK, hash_table_get_size(hs, &size));
+    assert_int_equal(0, size);
+
+    for(i=0; i<5; ++i)
+    {
+        assert_return_code(OK, hash_table_insert(hs, &a[i]));
+    }
 
     assert_int_not_equal(OK, hash_table_destroy(NULL));
     assert_return_code(OK, hash_table_destroy(hs));
