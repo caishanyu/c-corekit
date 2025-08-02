@@ -7,3 +7,6 @@
 [队列](./queue)
 
 [栈](./stack)
+
+[哈希表](./hash_table)
+
