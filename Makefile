@@ -18,6 +18,7 @@ SRCS := common/debug.c				\
 		ds/queue/queue.c			\
 		ds/stack/stack.c			\
 		ds/hash_table/hash_table.c	\
+		thread_pool/thread_pool.c	\
 		main.c
 OBJS := $(SRCS:%.c=$(OBJ_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)

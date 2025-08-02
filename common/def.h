@@ -45,6 +45,10 @@ typedef enum
     /* hash_table模块错误码 */
     ERR_HASH_TABLE_START = 2000,
     ERR_HASH_TABLE_DATA_EXIST,
+
+    /* thread_pool模块 */
+    ERR_THREAD_POOL_START = 3000,
+    ERR_THREAD_POOL_TASK_QUEUE_FULL,
 }STATUS;
 
 /*
