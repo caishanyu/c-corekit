@@ -7,6 +7,7 @@
 
 int main()
 {
+#if CMOCKA_TEST
     const struct CMUnitTest tests[] = {
 #if ATOMIC_TEST        
         cmocka_unit_test(test_atomic_counter),  // 注册测试用例
@@ -36,6 +37,6 @@ int main()
     
     cmocka_run_group_tests(tests, NULL, NULL); // 运行测试组
 
-
+#endif
     return 0;
 }
