@@ -160,7 +160,6 @@ static STATUS _dlist_display(IN dlist *l, IN DLIST_ORDER_TYPE order)
 
     DLIST_LOCK(l);
 
-    printf("Dlist %p, %s:\r\n", (void*)l, DLIST_ORDER == order ? "order" : "reverse");
     ptr = DLIST_ORDER == order ?
                          l->head->next:
                          l->tail;
@@ -175,7 +174,7 @@ static STATUS _dlist_display(IN dlist *l, IN DLIST_ORDER_TYPE order)
                             ptr->next:
                             ptr->prior;
     }
-    printf("\r\n====\r\n");
+    printf("\r\n");
 
     DLIST_UNLOCK(l);
 
