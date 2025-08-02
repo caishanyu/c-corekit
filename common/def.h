@@ -59,6 +59,7 @@ typedef enum
 #define QUEUE_TEST  (1)
 #define STACK_TEST  (1)
 #define HASH_TABLE_TEST (1)
+#define THREAD_POOL_TEST    (1)
 
 /*
     Cmocka测试框架宏

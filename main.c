@@ -4,6 +4,7 @@
 #include "ds/queue/queue.h"
 #include "ds/stack/stack.h"
 #include "ds/hash_table/hash_table.h"
+#include "thread_pool/thread_pool.h"
 
 int main()
 {
@@ -30,6 +31,10 @@ int main()
 
 #if HASH_TABLE_TEST
         cmocka_unit_test(hash_table_test),
+#endif
+
+#if THREAD_POOL_TEST
+        cmocka_unit_test(thread_pool_test),
 #endif
 
         // 可添加更多用例

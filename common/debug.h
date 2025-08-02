@@ -34,13 +34,13 @@ extern pthread_mutex_t debug_mutex;
 #define COLOR_BOLD    "\033[1m"
 
 static inline void _dbg_print(const char* timestamp, long ms, 
-                             pid_t pid, long tid, 
+                             pid_t pid, long tid, const char *func, int line,
                              const char* fmt, ...) {
     // 打印头部信息（带颜色）
     fprintf(stderr, COLOR_BOLD COLOR_CYAN "[%d" COLOR_RESET ":" \
             COLOR_BOLD COLOR_BLUE "%lu" COLOR_RESET " " \
-            COLOR_GREEN "%s" COLOR_YELLOW ".%03ld" COLOR_RESET "] ",
-            pid, tid, timestamp, ms);
+            COLOR_GREEN "%s" COLOR_YELLOW ".%03ld" COLOR_RESET "] <%s,%d> ",
+            pid, tid, timestamp, ms, func, line);
     
     // 打印用户消息（白色）
     fprintf(stderr, COLOR_WHITE);
@@ -68,7 +68,7 @@ static inline void _dbg_print(const char* timestamp, long ms,
     char _ts_buf[24]; \
     strftime(_ts_buf, sizeof(_ts_buf), "%Y-%m-%d %H:%M:%S", _tm); \
     _dbg_print(_ts_buf, _tv.tv_usec / 1000, getpid(), \
-              (unsigned long)pthread_self(), __VA_ARGS__); \
+              (unsigned long)pthread_self(), __func__, __LINE__, __VA_ARGS__); \
     pthread_mutex_unlock(&debug_mutex); \
 } while(0)
 

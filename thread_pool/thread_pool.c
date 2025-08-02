@@ -8,8 +8,6 @@
     Typedef
 */
 
-typedef void (*task_func)(void*);
-
 // 任务节点结构定义
 typedef struct task_s
 {
@@ -140,10 +138,12 @@ static thread_pool_t* _thread_pool_create(
         goto error;
     }
 
+    ret->shutdown_flag = 0;
+
     // 创建线程，进入工作函数
     for(i = 0; i < thread_count; ++ i)
     {
-        if(unlikely(0 != pthread_create(&ret->thread_arr[i], NULL, thread_worker, NULL)))
+        if(unlikely(0 != pthread_create(&ret->thread_arr[i], NULL, thread_worker, (void*)ret)))
         {
             DBG("create thread %d fail", i);
 
@@ -154,8 +154,6 @@ static thread_pool_t* _thread_pool_create(
             goto error;
         }
     }
-
-    ret->shutdown_flag = 0;
 
     return ret;
 
@@ -236,3 +234,53 @@ static STATUS _thread_pool_destroy(
 
     return OK;
 }
+
+/*
+    Variables
+*/
+
+thread_pool_ops thread_pool_operations = {
+    .thread_pool_add_task = _thread_pool_add_task,
+    .thread_pool_create = _thread_pool_create,
+    .thread_pool_destroy = _thread_pool_destroy
+};
+
+#if THREAD_POOL_TEST
+// 示例任务函数
+void sample_task(void *arg) 
+{
+    int num = *(int *)arg;
+    printf("Task %d processed by thread %lu\n", num, (unsigned long)pthread_self());
+    free(arg); // 清理动态分配的参数
+}
+void thread_pool_test()
+{
+#if CMOCKA_TEST
+    int i = 0;
+
+    // 创建4线程+10容量的线程池
+    thread_pool_t *pool = thread_pool_create(4, 10);
+    if (!pool) 
+    {
+        fprintf(stderr, "Create threadpool failed\n");
+        return;
+    }
+
+    // 添加20个任务
+    for (; i < 20; i++) 
+    {
+        int *arg = malloc(sizeof(int));
+        *arg = i;
+        while (thread_pool_add_task(pool, sample_task, arg) != 0) 
+        {
+            sched_yield();
+        }
+    }
+
+    sleep(2); // 等待任务完成
+    thread_pool_destroy(pool); // 关闭
+
+#endif
+}
+
+#endif
