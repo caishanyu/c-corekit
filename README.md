@@ -63,12 +63,13 @@ tree
 
 构建时需要确保安装了对应库，可以查看[cmocka](https://github.com/caishanyu/notes/blob/main/cmocka.md)
 
+**8/3/25更新**：原使用`Makefile`，修改为使用`CMake`，覆盖率测试生成有待修改
+
 ```bash
-make    # 执行编译
-
-./bin/main # 运行测试
-
-./tool/gcov.sh # 运行脚本，生成覆盖率，确保main被运行过
-
-make clean  # 删除构建产物
+mkdir build
+cd build
+cmake ..
+make
+./MAIN
+make clean # 基本的清理
 ```
